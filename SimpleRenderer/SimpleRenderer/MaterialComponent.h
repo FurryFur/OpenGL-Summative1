@@ -23,5 +23,7 @@ struct MaterialComponent {
 	GLuint texture;
 	GLenum textureType;
 	bool enableDepth;
+	bool hasOutline;
+	bool isOutline;
 	ShaderParams shaderParams;
 };

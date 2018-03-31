@@ -26,7 +26,7 @@
 using glm::mat4;
 using glm::vec3;
 
-RenderSystem::RenderSystem(GLFWwindow* glContext, const Scene& scene)
+RenderSystem::RenderSystem(GLFWwindow* glContext, Scene& scene)
 	: m_glContext{ glContext }
 	, m_scene{ scene }
 	, m_uniformBindingPoint{ 0 }
@@ -48,7 +48,9 @@ RenderSystem::RenderSystem(GLFWwindow* glContext, const Scene& scene)
 void RenderSystem::beginRender()
 {
 	glDepthMask(GL_TRUE);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glStencilMask(0xFF);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void RenderSystem::endRender()
@@ -65,9 +67,9 @@ void RenderSystem::update(size_t entityID)
 		return;
 
 	// Get rendering components of entity
-	const MaterialComponent& material = m_scene.materialComponents[entityID];
+	MaterialComponent& material = m_scene.materialComponents[entityID];
 	const MeshComponent& mesh = m_scene.meshComponents.at(entityID);
-	const mat4& transform = m_scene.transformComponents.at(entityID);
+	mat4& transform = m_scene.transformComponents.at(entityID);
 
 	// TODO: Add check that camera is a valid camera entity, throw error otherwise
 	const mat4& cameraTransform = m_scene.transformComponents.at(m_cameraEntity);
@@ -79,6 +81,25 @@ void RenderSystem::update(size_t entityID)
 	else {
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_LEQUAL);
+	}
+
+	if (material.hasOutline) {
+		glEnable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilFunc(GL_ALWAYS, 0xFF, 0xFF);
+	}
+	else if (material.isOutline) {
+		glEnable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		glStencilFunc(GL_NOTEQUAL, 0xFF, 0xFF);
+	}
+	else {
+		glDisable(GL_STENCIL_TEST);
+	}
+	
+	if (material.isOutline) {
+		//glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
+		//glDepthFunc(GL_ALWAYS);
 	}
 
 	// Tell the gpu what material to use
@@ -123,6 +144,27 @@ void RenderSystem::update(size_t entityID)
 	// Draw object
 	glBindVertexArray(mesh.VAO);
 	glDrawElements(GL_TRIANGLES, mesh.numIndices, GL_UNSIGNED_INT, 0);
+
+	if (material.hasOutline) {
+		// Save original render state variables
+		GLuint origShader = material.shader;
+		mat4 origTransform = transform;
+
+		// Apply outline render state
+		material.shader = GLUtils::getOutlineShader();
+		material.hasOutline = false;
+		material.isOutline = true;
+		transform = transform * glm::scale(mat4{}, vec3{ 1.1f, 1.1f, 1.1f });
+
+		// Render scaled up object with outline shader
+		update(entityID);
+		
+		// Restore render state variables
+		material.shader = origShader;
+		material.hasOutline = true;
+		material.isOutline = false;
+		transform = origTransform;
+	}
 }
 
 void RenderSystem::setCamera(size_t entityID)

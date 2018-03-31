@@ -47,7 +47,7 @@ namespace SceneUtils {
 	// Creates a pyramid
 	size_t createPyramid(Scene&, const glm::mat4& transform = glm::mat4{ 1 });
 
-	// Creates a pyramid
+	// Creates a cube
 	size_t createCube(Scene&, const glm::mat4& transform = glm::mat4{ 1 });
 
 	// Creates a camera.

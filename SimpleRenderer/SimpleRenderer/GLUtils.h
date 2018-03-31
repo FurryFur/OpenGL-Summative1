@@ -36,6 +36,10 @@ namespace GLUtils {
 	// This function will build the shader if it is not already built.
 	GLuint getThresholdShader();
 
+	// Returna a hander to the shader for outlining 3D objects.
+	// This function will compile and link the shader if it has not been done already.
+	GLuint getOutlineShader();
+
 	// Returns a hander to the skybox shader.
 	// This function will build the sahder if it is not already built.
 	GLuint getSkyboxShader();

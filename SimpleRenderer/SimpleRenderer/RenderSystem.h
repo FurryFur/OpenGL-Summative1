@@ -20,7 +20,7 @@ struct GLFWwindow;
 
 class RenderSystem {
 public:
-	RenderSystem(GLFWwindow* glContext, const Scene&);
+	RenderSystem(GLFWwindow* glContext, Scene&);
 	RenderSystem(const RenderSystem&) = delete;
 	RenderSystem& operator=(const RenderSystem&) = delete;
 
@@ -42,7 +42,7 @@ public:
 
 private:
 	GLFWwindow* m_glContext;
-	const Scene& m_scene;
+	Scene& m_scene;
 	GLuint m_uboUniforms;
 	GLuint m_uboShaderParams;
 	GLuint m_uniformBindingPoint;

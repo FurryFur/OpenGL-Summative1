@@ -40,9 +40,10 @@ int main()
 
 	// Order matters, buttons are assigned to the first four entities created
 	SceneUtils::createSphere(scene, glm::translate({}, glm::vec3{ -1.5f, 1.5f, 0 }));
-	SceneUtils::createQuad(scene, 
+	size_t cubeID = SceneUtils::createCube(scene, 
 		  glm::translate({}, glm::vec3{ 1.5f, 1.5f, 0})
 		* glm::rotate(glm::mat4{}, static_cast<float>(-M_PI / 16), glm::vec3{ 1, 0, 0 }));
+	scene.materialComponents[cubeID].hasOutline = true;
 	SceneUtils::createCylinder(scene, 1.5, 1.5,
 		  glm::translate(glm::mat4{}, glm::vec3{ -1.5f, -1.5f, 0 })
 		* glm::rotate(glm::mat4{}, static_cast<float>(M_PI / 4), glm::vec3{ 0, 0, 1 }));

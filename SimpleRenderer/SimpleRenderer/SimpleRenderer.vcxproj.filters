@@ -139,6 +139,9 @@
     <None Include="Assets\Shaders\skybox_vert.glsl">
       <Filter>Assets\Shaders</Filter>
     </None>
+    <None Include="Assets\Shaders\outline_frag.glsl">
+      <Filter>Assets\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Textures\PlaneTexture.jpg">

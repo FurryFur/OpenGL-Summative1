@@ -58,6 +58,7 @@ GLFWwindow* GLUtils::initOpenGL()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_STENCIL_BITS, 8);
 	GLFWwindow* glContext = glfwCreateWindow(g_kWindowWidth, g_kWindowHeight, "Simple Renderer", nullptr, nullptr);
 	if (!glContext)
 	{
@@ -119,6 +120,22 @@ GLuint GLUtils::getThresholdShader()
 		compileAndLinkShaders(
 			"Assets/Shaders/default_vert.glsl",
 			"Assets/Shaders/threshold_frag.glsl",
+			s_shader);
+		s_shaderBuilt = true;
+	}
+
+	return s_shader;
+}
+
+GLuint GLUtils::getOutlineShader()
+{
+	static GLuint s_shader;
+	static bool s_shaderBuilt = false;
+
+	if (!s_shaderBuilt) {
+		compileAndLinkShaders(
+			"Assets/Shaders/default_vert.glsl",
+			"Assets/Shaders/outline_frag.glsl",
 			s_shader);
 		s_shaderBuilt = true;
 	}
