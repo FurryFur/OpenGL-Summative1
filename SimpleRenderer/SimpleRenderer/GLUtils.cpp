@@ -29,6 +29,11 @@
 
 #define BUFFER_OFFSET(i) ((GLvoid *)(i*sizeof(float)))
 
+int g_kWindowWidth = 800;
+int g_kWindowHeight = 800;
+int g_kMovieBarHeight = 100;
+
+
 // Callback for handling glfw errors
 void errorCallback(int error, const char* description)
 {
@@ -39,6 +44,7 @@ void errorCallback(int error, const char* description)
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+	glScissor(0, g_kMovieBarHeight, width, height - 2 * g_kMovieBarHeight);
 }
 
 GLFWwindow* GLUtils::initOpenGL()
@@ -52,7 +58,7 @@ GLFWwindow* GLUtils::initOpenGL()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* glContext = glfwCreateWindow(800, 800, "Simple Renderer", nullptr, nullptr);
+	GLFWwindow* glContext = glfwCreateWindow(g_kWindowWidth, g_kWindowHeight, "Simple Renderer", nullptr, nullptr);
 	if (!glContext)
 	{
 		std::cerr << "Failed to create GLFW window" << std::endl;
@@ -75,13 +81,15 @@ GLFWwindow* GLUtils::initOpenGL()
 
 	// Configure glContext
 	glfwSwapInterval(1);
+
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_SCISSOR_TEST);
 
 	// Setup opengl viewport
 	int width, height;
 	glfwGetFramebufferSize(glContext, &width, &height);
-	glViewport(0, 0, width, height);
+	glScissor(0, g_kMovieBarHeight, width, height - 2 * g_kMovieBarHeight);
 
 	return glContext;
 }
