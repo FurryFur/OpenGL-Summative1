@@ -59,6 +59,7 @@ GLFWwindow* GLUtils::initOpenGL()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_STENCIL_BITS, 8);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	GLFWwindow* glContext = glfwCreateWindow(g_kWindowWidth, g_kWindowHeight, "Simple Renderer", nullptr, nullptr);
 	if (!glContext)
 	{
@@ -89,6 +90,7 @@ GLFWwindow* GLUtils::initOpenGL()
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
+	glEnable(GL_MULTISAMPLE);
 
 	// Setup opengl viewport
 	int width, height;
