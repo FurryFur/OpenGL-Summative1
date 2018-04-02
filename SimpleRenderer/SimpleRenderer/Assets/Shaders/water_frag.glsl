@@ -102,7 +102,7 @@ void main(void)
 	else
 		normal = -normalize(i.normal);
 
-	vec4 colorRGBA = texture(sampler, i.texCoord).rgba;
+	vec4 colorRGBA = texture(sampler, i.texCoord * 10).rgba;
 	vec3 color = colorRGBA.rgb;
 
 	// Direct Lighting variables

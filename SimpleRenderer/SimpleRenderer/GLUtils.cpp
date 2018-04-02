@@ -26,6 +26,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 
 #include <iostream>
+#include <unordered_map>
 
 #define BUFFER_OFFSET(i) ((GLvoid *)(i*sizeof(float)))
 
@@ -148,6 +149,22 @@ GLuint GLUtils::getOutlineShader()
 	return s_shader;
 }
 
+GLuint GLUtils::getWaterShader()
+{
+	static GLuint s_shader;
+	static bool s_shaderBuilt = false;
+
+	if (!s_shaderBuilt) {
+		compileAndLinkShaders(
+			"Assets/Shaders/default_vert.glsl",
+			"Assets/Shaders/water_frag.glsl",
+			s_shader);
+		s_shaderBuilt = true;
+	}
+
+	return s_shader;
+}
+
 GLuint GLUtils::getSkyboxShader()
 {
 	static GLuint s_shader;
@@ -194,10 +211,34 @@ GLuint GLUtils::bufferVertices(const std::vector<VertexFormat>& vertices, const 
 
 GLuint GLUtils::loadTexture(const std::string& filename)
 {
-	// TODO: Make cached so duplicate textures aren't loaded to the GPU
+	static std::unordered_map<std::string, GLuint> s_loadedTextures;
+
+	// A texture with the same filepath has already been loaded, return a copy. (optimization)
+	if (s_loadedTextures.find(filename) != s_loadedTextures.end())
+		return s_loadedTextures.at(filename);
 
 	int width, height, nrChannels;
 	unsigned char* textureData = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
+
+	GLenum format;
+	switch (nrChannels)
+	{
+	case 1:
+		format = GL_R;
+		break;
+	case 2:
+		format = GL_RG;
+		break;
+	case 3:
+		format = GL_RGB;
+		break;
+	case 4:
+		format = GL_RGBA;
+		break;
+	default:
+		format = GL_RGBA;
+		break;
+	}
 
 	GLuint texture;
 	glGenTextures(1, &texture);
@@ -209,11 +250,13 @@ GLuint GLUtils::loadTexture(const std::string& filename)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	stbi_image_free(textureData);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	s_loadedTextures.insert(std::make_pair(filename, texture));
 
 	return texture;
 }

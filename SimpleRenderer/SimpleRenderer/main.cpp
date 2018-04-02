@@ -40,14 +40,39 @@ int main()
 
 	// Order matters, buttons are assigned to the first four entities created
 	SceneUtils::createSphere(scene, glm::translate({}, glm::vec3{ -1.5f, 1.5f, 0 }));
+
 	size_t cubeID = SceneUtils::createCube(scene, 
 		  glm::translate({}, glm::vec3{ 1.5f, 1.5f, 0})
 		* glm::rotate(glm::mat4{}, static_cast<float>(-M_PI / 16), glm::vec3{ 1, 0, 0 }));
 	scene.materialComponents[cubeID].hasOutline = true;
+	scene.materialComponents[cubeID].texture = GLUtils::loadTexture("Assets/Textures/transparent.png");
+	scene.materialComponents[cubeID].isTransparent = true;
+
 	SceneUtils::createCylinder(scene, 1.5, 1.5,
 		  glm::translate(glm::mat4{}, glm::vec3{ -1.5f, -1.5f, 0 })
 		* glm::rotate(glm::mat4{}, static_cast<float>(M_PI / 4), glm::vec3{ 0, 0, 1 }));
-	SceneUtils::createPyramid(scene, glm::translate({}, glm::vec3{ 1.5f, -1.5f, 0 }));
+
+	size_t pyramidID = SceneUtils::createPyramid(scene, glm::translate({}, glm::vec3{ 1.5f, -1.5f, 0 }));
+	scene.materialComponents[pyramidID].texture = GLUtils::loadTexture("Assets/Textures/transparent.png");
+	scene.materialComponents[pyramidID].isTransparent = true;
+	
+	size_t waterID = SceneUtils::createQuad(scene, 
+		  glm::translate({}, glm::vec3{ 0, -4.0f, 0 })
+		* glm::rotate({}, static_cast<float>(-M_PI / 2), glm::vec3{ 1, 0, 0 })
+		* glm::scale({}, glm::vec3{ 100, 100, 100 }));
+	scene.materialComponents[waterID].shader = GLUtils::getWaterShader();
+	scene.materialComponents[waterID].isTransparent = true;
+	scene.materialComponents[waterID].shaderParams.metallicness = 0.5;
+	scene.materialComponents[waterID].texture = GLUtils::loadTexture("Assets/Textures/water.png");
+	scene.componentMasks[waterID] &= ~COMPONENT_LOGIC;
+
+	size_t waterFloorID = SceneUtils::createQuad(scene,
+		glm::translate({}, glm::vec3{ 0, -6.0f, 0 })
+		* glm::rotate({}, static_cast<float>(-M_PI / 2), glm::vec3{ 1, 0, 0 })
+		* glm::scale({}, glm::vec3{ 100, 100, 100 }));
+	scene.materialComponents[waterFloorID].shaderParams.metallicness = 0;
+	scene.materialComponents[waterFloorID].texture = GLUtils::loadTexture("Assets/Textures/dessert-floor.png");
+	scene.componentMasks[waterFloorID] &= ~COMPONENT_LOGIC;
 	
 	//SceneUtils::createCube(scene);
 	size_t skybox = SceneUtils::createSkybox(scene, {

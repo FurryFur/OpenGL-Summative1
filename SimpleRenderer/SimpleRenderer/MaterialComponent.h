@@ -25,5 +25,6 @@ struct MaterialComponent {
 	bool enableDepth;
 	bool hasOutline;
 	bool isOutline;
+	bool isTransparent;
 	ShaderParams shaderParams;
 };

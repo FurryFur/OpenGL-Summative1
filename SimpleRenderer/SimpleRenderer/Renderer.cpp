@@ -51,10 +51,20 @@ void RenderSystem::beginRender()
 
 	glStencilMask(0xFF);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	glm::vec3 cameraPos = m_scene.transformComponents.at(m_cameraEntity)[3];
+	m_transparentObjects = std::priority_queue<size_t, std::vector<size_t>, CompareDepth>(
+		CompareDepth(&m_scene, cameraPos)
+	);
 }
 
 void RenderSystem::endRender()
 {
+	while (m_transparentObjects.size() > 0) {
+		update(m_transparentObjects.top());
+		m_transparentObjects.pop();
+	}
+
 	glfwSwapBuffers(m_glContext);
 }
 
@@ -85,6 +95,7 @@ void RenderSystem::update(size_t entityID)
 		glDepthFunc(GL_LEQUAL);
 	}
 
+	// Do Stencil setup for outlined objects
 	if (material.hasOutline) {
 		glEnable(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
@@ -97,6 +108,22 @@ void RenderSystem::update(size_t entityID)
 	}
 	else {
 		glDisable(GL_STENCIL_TEST);
+	}
+
+	// Handle transparent objects
+	if (material.isTransparent && m_transparentObjects.size() > 0 && m_transparentObjects.top() == entityID) {
+		// If we are rendering the transparent object queue then enable blending
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+	else if (material.isTransparent) {
+		// If we encounter a transparent object while rendering then defer the render till later
+		m_transparentObjects.push(entityID);
+		return;
+	}
+	else {
+		// Disable blending for opaque objects
+		glDisable(GL_BLEND);
 	}
 
 	// Tell the gpu what material to use
@@ -142,6 +169,7 @@ void RenderSystem::update(size_t entityID)
 	glBindVertexArray(mesh.VAO);
 	glDrawElements(GL_TRIANGLES, mesh.numIndices, GL_UNSIGNED_INT, 0);
 
+	// Handle rendering outline for outlined objects
 	if (material.hasOutline) {
 		// Save original render state variables
 		GLuint origShader = material.shader;
