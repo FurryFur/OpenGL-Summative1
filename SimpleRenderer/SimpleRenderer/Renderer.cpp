@@ -75,10 +75,12 @@ void RenderSystem::update(size_t entityID)
 	const mat4& cameraTransform = m_scene.transformComponents.at(m_cameraEntity);
 
 	if (material.enableDepth) {
+		glCullFace(GL_BACK);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
 	}
 	else {
+		glCullFace(GL_FRONT);
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_LEQUAL);
 	}
@@ -95,11 +97,6 @@ void RenderSystem::update(size_t entityID)
 	}
 	else {
 		glDisable(GL_STENCIL_TEST);
-	}
-	
-	if (material.isOutline) {
-		//glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
-		//glDepthFunc(GL_ALWAYS);
 	}
 
 	// Tell the gpu what material to use

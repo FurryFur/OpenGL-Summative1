@@ -86,6 +86,9 @@ GLFWwindow* GLUtils::initOpenGL()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_SCISSOR_TEST);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
 
 	// Setup opengl viewport
 	int width, height;
