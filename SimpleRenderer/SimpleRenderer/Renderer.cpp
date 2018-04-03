@@ -18,6 +18,7 @@
 #include "MeshComponent.h"
 #include "Scene.h"
 #include "UniformFormat.h"
+#include "SceneUtils.h"
 
 #include <GLFW\glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
@@ -25,6 +26,7 @@
 
 using glm::mat4;
 using glm::vec3;
+using glm::vec4;
 
 RenderSystem::RenderSystem(GLFWwindow* glContext, Scene& scene)
 	: m_glContext{ glContext }
@@ -203,4 +205,89 @@ void RenderSystem::setEnvironmentMap(size_t entityID)
 	// TODO: Error if not a cube map
 	m_environmentMap = m_scene.materialComponents.at(entityID).texture;
 	m_isEnvironmentMap = true;
+}
+
+bool RenderSystem::mousePick(const glm::dvec2& mousePos, size_t& outEntityID) const
+{
+	/**********************************/
+	/** Construct ray in world space **/
+	/**********************************/
+
+	int width;
+	int height;
+	glfwGetFramebufferSize(glfwGetCurrentContext(), &width, &height);
+	float aspectRatio = static_cast<float>(width) / height;
+
+	// Get mouse position in NDC space
+	glm::vec2 mousePosNDC;
+	mousePosNDC.x = 2 * mousePos.x / width - 1;
+	mousePosNDC.y = 1 - 2 * mousePos.y / height;
+
+	// Clip space
+	glm::vec4 clipCoords = glm::vec4(mousePosNDC.x, mousePosNDC.y, -1, 1);
+
+	// View space
+	mat4 inverseProj = glm::inverse(glm::perspective(glm::radians(60.0f), aspectRatio, 0.5f, 100.0f));
+	glm::vec4 eyeCoords = inverseProj * clipCoords;
+	//eyeCoords /= eyeCoords.w;
+	eyeCoords.z = -1;
+	eyeCoords.w = 0;
+
+	// World space
+	const mat4& inverseView = m_scene.transformComponents.at(m_cameraEntity);
+	glm::vec4 rayDir4 = inverseView * eyeCoords;
+	glm::vec3 rayDir = rayDir4;
+	rayDir = glm::normalize(rayDir);
+	glm::vec3 rayOrigin = inverseView[3];
+
+	/***************************************/
+	/** Perform raytrace for scene entity **/
+	/***************************************/
+
+	// Perform ray trace for entities
+	for (size_t entityID = 0; entityID < SceneUtils::getEntityCount(m_scene); ++entityID) {
+		// Filter for renderable components
+		const size_t kRenderableMask = COMPONENT_MESH | COMPONENT_MATERIAL;
+		if ((m_scene.componentMasks.at(entityID) & kRenderableMask) != kRenderableMask)
+			continue;
+
+		auto& indices = *m_scene.meshComponents[entityID].indices;
+		auto& vertices = *m_scene.meshComponents[entityID].vertices;
+		mat4 model = m_scene.transformComponents[entityID];
+
+		for (size_t i = 0; i < indices.size(); i += 3) {
+
+			const float EPSILON = 0.0000001;
+			vec3 vertex0 = model * vec4{ vertices[indices[i]].position, 1.0f };
+			vec3 vertex1 = model * vec4{ vertices[indices[i + 1]].position, 1.0f };
+			vec3 vertex2 = model * vec4{ vertices[indices[i + 2]].position, 1.0f };
+			vec3 edge1, edge2, h, s, q;
+			float a, f, u, v;
+			edge1 = vertex1 - vertex0;
+			edge2 = vertex2 - vertex0;
+			h = glm::cross(rayDir, edge2);
+			a = glm::dot(edge1, h);
+			if (a > -EPSILON && a < EPSILON)
+				continue;
+			f = 1 / a;
+			s = rayOrigin - vertex0;
+			u = f * glm::dot(s, h);
+			if (u < 0.0 || u > 1.0)
+				continue;
+			q = glm::cross(s, edge1);
+			v = f * glm::dot(rayDir, q);
+			if (v < 0.0 || u + v > 1.0)
+				continue;
+			// At this stage we can compute t to find out where the intersection point is on the line.
+			float t = f * glm::dot(edge2, q);
+			if (t > EPSILON) // ray intersection
+			{
+				// outIntersectionPoint = rayOrigin + rayDir * t;
+				outEntityID = entityID;
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

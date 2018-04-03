@@ -579,7 +579,9 @@ MeshComponent SceneUtils::getQuadMesh()
 	static const std::vector<GLuint>& indices = getQuadIndices();
 	static const MeshComponent mesh{
 		GLUtils::bufferVertices(vertices, indices),
-		static_cast<GLsizei>(indices.size())
+		static_cast<GLsizei>(indices.size()),
+		&vertices,
+		&indices
 	};
 
 	return mesh;
@@ -591,7 +593,9 @@ MeshComponent SceneUtils::getSphereMesh()
 	static const std::vector<GLuint>& indices = getSphereIndices();
 	static const MeshComponent mesh{
 		GLUtils::bufferVertices(vertices, indices),
-		static_cast<GLsizei>(indices.size())
+		static_cast<GLsizei>(indices.size()),
+		&vertices,
+		&indices
 	};
 
 	return mesh;
@@ -603,7 +607,9 @@ MeshComponent SceneUtils::getCylinderMesh()
 	static const std::vector<GLuint>& indices = getCylinderIndices();
 	static const MeshComponent mesh{
 		GLUtils::bufferVertices(vertices, indices),
-		static_cast<GLsizei>(indices.size())
+		static_cast<GLsizei>(indices.size()),
+		&vertices,
+		&indices
 	};
 
 	return mesh;
@@ -615,7 +621,9 @@ MeshComponent SceneUtils::getPyramidMesh()
 	static const std::vector<GLuint>& indices = getPyramidIndices();
 	static const MeshComponent mesh{
 		GLUtils::bufferVertices(vertices, indices),
-		static_cast<GLsizei>(indices.size())
+		static_cast<GLsizei>(indices.size()),
+		&vertices,
+		&indices
 	};
 
 	return mesh;
@@ -627,7 +635,9 @@ MeshComponent SceneUtils::getCubeMesh()
 	static const std::vector<GLuint>& indices = getCubeIndices();
 	static const MeshComponent mesh{
 		GLUtils::bufferVertices(vertices, indices),
-		static_cast<GLsizei>(indices.size())
+		static_cast<GLsizei>(indices.size()),
+		&vertices,
+		&indices
 	};
 
 	return mesh;

@@ -23,4 +23,6 @@
 struct MeshComponent {
 	GLuint VAO;
 	GLsizei numIndices;
+	const std::vector<VertexFormat>* vertices;
+	const std::vector<GLuint>* indices;
 };

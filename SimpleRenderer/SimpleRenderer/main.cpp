@@ -35,7 +35,7 @@ int main()
 	Scene scene;
 	RenderSystem renderSystem(window, scene);
 	MovementSystem movementSystem(scene);
-	InputSystem inputSystem(window, scene);
+	InputSystem inputSystem(window, renderSystem, scene);
 	GameplayLogicSystem gameplayLogicSystem(scene, inputSystem);
 
 	// Order matters, buttons are assigned to the first four entities created

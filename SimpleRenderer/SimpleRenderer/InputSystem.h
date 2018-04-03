@@ -21,10 +21,11 @@
 struct Scene;
 struct GLFWwindow;
 class IKeyObserver;
+class RenderSystem;
 
 class InputSystem {
 public:
-	InputSystem(GLFWwindow* window, Scene&);
+	InputSystem(GLFWwindow* window, RenderSystem&, Scene&);
 
 	// Updates the entity with input
 	void update(size_t entityID);
@@ -39,8 +40,11 @@ private:
 	// Handles keyboard events
 	void keyCallback(int key, int scancode, int action, int mods);
 
-	Scene& m_scene;
+	void mouseBtnCallback(int button, int action, int mods);
+
 	GLFWwindow* m_window;
+	Scene& m_scene;
+	RenderSystem& m_renderSystem;
 	glm::dvec2 m_mouseDelta;
 	std::vector<IKeyObserver*> m_keyObservers;
 };

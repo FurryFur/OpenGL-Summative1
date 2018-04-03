@@ -17,11 +17,14 @@
 
 #include "KeyObserver.h"
 #include "Scene.h"
+#include "SceneUtils.h"
+#include "RenderSystem.h"
 
 #include <GLFW\glfw3.h>
 
-InputSystem::InputSystem(GLFWwindow* window, Scene& scene)
+InputSystem::InputSystem(GLFWwindow* window, RenderSystem& renderSystem, Scene& scene)
 	: m_window{ window }
+	, m_renderSystem{ renderSystem }
 	, m_scene{ scene }
 {
 	// Register input system as a listener for keyboard events
@@ -30,7 +33,12 @@ InputSystem::InputSystem(GLFWwindow* window, Scene& scene)
 		InputSystem* inputSystem = static_cast<InputSystem*>(glfwGetWindowUserPointer(window));
 		inputSystem->keyCallback(key, scancode, action, mods);
 	};
+	auto mouseFunc = [](GLFWwindow* window, int button, int action, int mods) {
+		InputSystem* inputSystem = static_cast<InputSystem*>(glfwGetWindowUserPointer(window));
+		inputSystem->mouseBtnCallback(button, action, mods);
+	};
 	glfwSetKeyCallback(window, keyFunc);
+	glfwSetMouseButtonCallback(window, mouseFunc);
 }
 
 void InputSystem::registerKeyObserver(IKeyObserver* observer)
@@ -48,6 +56,18 @@ void InputSystem::keyCallback(int key, int scancode, int action, int mods)
 
 	for (auto& observer : m_keyObservers)
 		observer->keyCallback(key, scancode, action, mods);
+}
+
+void InputSystem::mouseBtnCallback(int button, int action, int mods)
+{
+	if (action == GLFW_PRESS) {
+		glm::dvec2 mousePos;
+		glfwGetCursorPos(m_window, &mousePos.x, &mousePos.y);
+		size_t outEntityID;
+		if (m_renderSystem.mousePick(mousePos, outEntityID)) {
+			m_scene.materialComponents[outEntityID].hasOutline = ~m_scene.materialComponents[outEntityID].hasOutline;
+		}
+	}
 }
 
 void InputSystem::beginFrame()

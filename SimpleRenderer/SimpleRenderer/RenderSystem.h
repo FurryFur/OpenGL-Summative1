@@ -68,6 +68,7 @@ public:
 	// Sets the environment map for reflections
 	void setEnvironmentMap(size_t entityID);
 
+	bool mousePick(const glm::dvec2& mousePos, size_t& outEntityID) const;
 private:
 	GLFWwindow* m_glContext;
 	Scene& m_scene;
