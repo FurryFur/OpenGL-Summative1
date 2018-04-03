@@ -191,6 +191,8 @@ void RenderSystem::update(size_t entityID)
 		material.hasOutline = true;
 		material.isOutline = false;
 		transform = origTransform;
+
+		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 }
 
@@ -224,13 +226,13 @@ bool RenderSystem::mousePick(const glm::dvec2& mousePos, size_t& outEntityID) co
 	mousePosNDC.y = 1 - 2 * mousePos.y / height;
 
 	// Clip space
-	glm::vec4 clipCoords = glm::vec4(mousePosNDC.x, mousePosNDC.y, -1, 1);
+	glm::vec4 clipCoords = glm::vec4(mousePosNDC.x, mousePosNDC.y, 1, 1);
 
 	// View space
 	mat4 inverseProj = glm::inverse(glm::perspective(glm::radians(60.0f), aspectRatio, 0.5f, 100.0f));
 	glm::vec4 eyeCoords = inverseProj * clipCoords;
 	//eyeCoords /= eyeCoords.w;
-	eyeCoords.z = -1;
+	//eyeCoords.z = -1;
 	eyeCoords.w = 0;
 
 	// World space

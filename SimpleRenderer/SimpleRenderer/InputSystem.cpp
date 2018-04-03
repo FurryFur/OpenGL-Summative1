@@ -65,7 +65,7 @@ void InputSystem::mouseBtnCallback(int button, int action, int mods)
 		glfwGetCursorPos(m_window, &mousePos.x, &mousePos.y);
 		size_t outEntityID;
 		if (m_renderSystem.mousePick(mousePos, outEntityID)) {
-			m_scene.materialComponents[outEntityID].hasOutline = ~m_scene.materialComponents[outEntityID].hasOutline;
+			m_scene.materialComponents[outEntityID].hasOutline = !m_scene.materialComponents[outEntityID].hasOutline;
 		}
 	}
 }
